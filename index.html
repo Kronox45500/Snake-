@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Snake+</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="stage" id="stage">
+  <canvas id="game"></canvas>
+
+  <div class="level-toast" id="levelToast">Niveau 2<small>La cadence s'intensifie</small></div>
+  <div class="level-toast" id="xpToast">Niveau 4<small>Rang Argent</small></div>
+
+  <div class="hud hidden" id="hud">
+    <div class="hud-left">
+      <div class="hud-score" id="scoreBadge">0</div>
+      <div class="combo-tag" id="comboTag">x2 combo</div>
+    </div>
+    <div class="hud-right">
+      <div class="chip" id="modeChip">Niv. 1</div>
+      <div class="round-btn" id="pauseBtn"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg></div>
+    </div>
+  </div>
+
+  <div class="controls hidden" id="controlsBar">
+    <div class="dpad" id="dpad">
+      <button class="up">▲</button><div class="mid"></div>
+      <button class="left">◀</button><button class="mid"></button><button class="right">▶</button>
+      <button class="down">▼</button>
+    </div>
+    <div class="powerbar" id="powerbar"></div>
+  </div>
+
+  <!-- HOME -->
+  <div class="overlay" id="overlay-home">
+    <div class="overlay-inner">
+      <div class="topline">
+        <div class="brand">Snake+</div>
+        <div class="stat-row">
+          <div class="pill gold"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.6"/></svg><span id="coinCount">0</span></div>
+          <div class="pill crystal">💎<span id="crystalCount">0</span></div>
+          <div class="pill"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2l2.6 6.2L21 9l-5 4.6L17.4 20 12 16.5 6.6 20 8 13.6 3 9l6.4-.8L12 2z" fill="currentColor"/></svg><span id="bestScore">0</span></div>
+          <div class="icon-btn" id="openSettings" title="Réglages">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06A1.65 1.65 0 005.6 15a1.65 1.65 0 00-1.51-1H4a2 2 0 010-4h.09A1.65 1.65 0 005 8.6a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06A1.65 1.65 0 009 4.6a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06A1.65 1.65 0 0019.4 9c.36.1.68.32 1 .51H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+          </div>
+        </div>
+      </div>
+
+      <div class="rank-row">
+        <div class="rank-badge" id="rankBadge">🥉 Bronze · Niv. 1</div>
+        <div class="xp-wrap">
+          <div class="xp-label"><span id="xpNow">0</span><span id="xpNext">/100 XP</span></div>
+          <div class="xp-bar"><div class="xp-fill" id="xpFill" style="width:0%"></div></div>
+        </div>
+      </div>
+
+      <div class="modetabs">
+        <div class="modetab active" data-mode="free">Libre</div>
+        <div class="modetab" data-mode="career">Carrière</div>
+      </div>
+
+      <!-- FREE PANEL -->
+      <div id="freePanel">
+        <div class="preview-row">
+          <div class="preview-card" id="goToSnake">
+            <div class="swatch" id="snakeSwatch"></div>
+            <div class="label">Serpent</div>
+            <div class="name" id="snakeName">—</div>
+          </div>
+          <div class="preview-card" id="goToMap">
+            <div class="swatch" id="mapSwatch"></div>
+            <div class="label">Terrain</div>
+            <div class="name" id="mapName">—</div>
+            <div class="badge" id="mapMult">x1 pièces</div>
+          </div>
+        </div>
+
+        <div class="loadout-title">Objets équipés — touchez pour choisir (3 max)</div>
+        <div class="loadout-row" id="loadoutRow"></div>
+
+        <button class="btn" id="playBtn">Jouer en libre</button>
+        <div class="row2"><button class="btn secondary small" id="openShopFromHome">Boutique</button></div>
+      </div>
+
+      <!-- CAREER PANEL -->
+      <div id="careerPanel" class="panel-hidden">
+        <div class="career-progress" id="careerProgress">0/36 niveaux · 0★</div>
+        <div class="path-scroll" id="pathScroll"><div class="path-row" id="pathRow"></div></div>
+        <div class="scroll-hint">← Faites glisser pour parcourir tout l'arbre →</div>
+      </div>
+
+      <div class="footer-note">Progression sauvegardée sur cet appareil · <a id="resetLink">Réinitialiser</a></div>
+    </div>
+  </div>
+
+  <!-- RANKS -->
+  <div class="overlay hidden" id="overlay-ranks" style="justify-content:flex-start;">
+    <div class="overlay-inner">
+      <div class="topline"><div class="brand">Rangs</div></div>
+      <div class="card-list" id="ranksList"></div>
+      <button class="btn" id="closeRanks" style="margin-top:14px;">Retour</button>
+    </div>
+  </div>
+
+  <!-- SHOP -->
+  <div class="overlay hidden" id="overlay-shop">
+    <div class="overlay-inner">
+      <div class="topline">
+        <div class="brand">Boutique</div>
+        <div class="stat-row">
+          <div class="pill gold"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.6"/></svg><span id="coinCountShop">0</span></div>
+          <div class="pill crystal">💎<span id="crystalCountShop">0</span></div>
+        </div>
+      </div>
+      <div class="tabs">
+        <div class="tab active" data-tab="snakes">Serpents</div>
+        <div class="tab" data-tab="maps">Terrains</div>
+        <div class="tab" data-tab="items">Objets</div>
+        <div class="tab" data-tab="gacha">Gacha</div>
+      </div>
+      <div class="card-list" id="shopList"></div>
+      <button class="btn secondary" id="closeShop" style="margin-top:16px;">Retour</button>
+    </div>
+  </div>
+
+  <!-- GACHA REVEAL -->
+  <div class="overlay hidden" id="overlay-gacha" style="justify-content:center;">
+    <div class="overlay-inner">
+      <div class="capsule-stage" id="capsuleStage">
+        <div class="capsule" id="capsuleBall">
+          <div class="capsule-top"></div>
+          <div class="capsule-bottom"></div>
+        </div>
+      </div>
+      <div id="gachaReveal" class="hidden">
+        <div class="lr-icon" id="gachaIcon">⏳</div>
+        <div class="lr-rarity" id="gachaRarity">Légendaire</div>
+        <div class="lr-title" id="gachaName">Chronos</div>
+        <div class="go-sub" id="gachaMsg">Nouveau serpent débloqué !</div>
+        <button class="btn" id="gachaClose">Super !</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SETTINGS -->
+  <div class="overlay hidden" id="overlay-settings" style="justify-content:flex-start;">
+    <div class="overlay-inner">
+      <div class="topline"><div class="brand">Réglages</div></div>
+      <div class="bind-hint">Cliquez sur « Changer » puis appuyez sur la touche souhaitée. Les flèches WASD restent toujours actives en secours.</div>
+      <div class="card-list" id="settingsList"></div>
+      <button class="btn secondary" id="resetBinds" style="margin-top:14px;">Réinitialiser les touches</button>
+      <button class="btn" id="closeSettings" style="margin-top:10px;">Retour</button>
+    </div>
+  </div>
+
+  <!-- LEVEL INTRO -->
+  <div class="overlay hidden" id="overlay-levelintro" style="justify-content:center;">
+    <div class="overlay-inner">
+      <div class="lr-title" id="liTitle">Niveau 1</div>
+      <div class="level-desc"><div id="liDesc">—</div><div class="level-tags" id="liTags"></div></div>
+      <button class="btn" id="liStart">Commencer</button>
+      <button class="btn secondary" id="liBack" style="margin-top:10px;">Retour à la carte</button>
+    </div>
+  </div>
+
+  <!-- PAUSE -->
+  <div class="overlay hidden" id="overlay-pause" style="justify-content:center;">
+    <div class="overlay-inner">
+      <div class="lr-title">Pause</div>
+      <button class="btn" id="resumeBtn" style="margin-top:20px;">Reprendre</button>
+      <button class="btn secondary" id="quitBtn" style="margin-top:10px;">Abandonner</button>
+    </div>
+  </div>
+
+  <!-- GAME OVER (free mode) -->
+  <div class="overlay hidden" id="overlay-gameover" style="justify-content:center;">
+    <div class="overlay-inner">
+      <div class="go-title">Partie terminée</div>
+      <div class="go-score" id="finalScore">0</div>
+      <div class="go-sub" id="goDetails">+0 pièces</div>
+      <button class="btn" id="retryBtn">Rejouer</button>
+      <button class="btn secondary" id="homeBtn" style="margin-top:10px;">Accueil</button>
+    </div>
+  </div>
+
+  <!-- LEVEL RESULT (career mode) -->
+  <div class="overlay hidden" id="overlay-levelresult" style="justify-content:center;">
+    <div class="overlay-inner">
+      <div class="lr-icon" id="lrIcon">🏆</div>
+      <div class="lr-title" id="lrTitle">Niveau réussi !</div>
+      <div class="lr-stars" id="lrStars">★★★</div>
+      <div class="go-sub" id="lrSub">+20 pièces</div>
+      <button class="btn" id="lrPrimary">Continuer</button>
+      <button class="btn secondary" id="lrSecondary" style="margin-top:10px;">Carte des niveaux</button>
+    </div>
+  </div>
+
+</div>
+<script src="script.js"></script>
+</body>
+</html>
