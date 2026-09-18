@@ -38,6 +38,61 @@
 
   canvas{ position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); display:block; }
 
+  /* ---------- splash / start screen ---------- */
+  .splash{
+    position:absolute; inset:0; z-index:80;
+    display:flex; align-items:center; justify-content:center;
+    background:var(--bg); overflow:hidden; cursor:pointer; text-align:center;
+    transition:opacity .6s ease, transform .6s ease;
+  }
+  .splash.leaving{ opacity:0; transform:scale(1.06); pointer-events:none; }
+  .splash.hidden{ display:none; }
+  .splash-bg{
+    position:absolute; inset:-30%;
+    background:conic-gradient(from 0deg, rgba(124,92,255,0.28), rgba(51,230,196,0.22), rgba(255,84,112,0.22), rgba(124,92,255,0.28));
+    filter:blur(70px);
+    animation:splashSpin 22s linear infinite;
+  }
+  @keyframes splashSpin{ to{ transform:rotate(360deg); } }
+  .splash-particles{ position:absolute; inset:0; overflow:hidden; }
+  .splash-particle{
+    position:absolute; bottom:-10px; border-radius:50%; background:#fff;
+    animation-name:splashFloat; animation-timing-function:linear; animation-iteration-count:infinite;
+  }
+  @keyframes splashFloat{
+    0%{ transform:translateY(0) scale(1); opacity:0; }
+    12%{ opacity:0.55; }
+    88%{ opacity:0.35; }
+    100%{ transform:translateY(-115vh) scale(0.5); opacity:0; }
+  }
+  .splash-content{ position:relative; z-index:2; padding:0 20px; }
+  .splash-snake{
+    font-size:44px; display:inline-block; margin-bottom:4px;
+    animation:snakeSlither 2.8s ease-in-out infinite;
+  }
+  @keyframes snakeSlither{
+    0%,100%{ transform:translateX(-16px) rotate(-10deg); }
+    50%{ transform:translateX(16px) rotate(10deg); }
+  }
+  .splash-title{
+    font-family:'Sora',sans-serif; font-weight:800; font-size:min(15vw,56px);
+    display:flex; justify-content:center; line-height:1;
+  }
+  .splash-title .letter{
+    display:inline-block; background:var(--accent-grad); -webkit-background-clip:text; background-clip:text; color:transparent;
+    animation:letterBounce 2.2s ease-in-out infinite;
+    text-shadow:0 0 30px rgba(124,92,255,0.35);
+  }
+  @keyframes letterBounce{ 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-14px); } }
+  .splash-tagline{ color:var(--text-dim); font-size:13px; margin-top:12px; letter-spacing:0.3px; }
+  .splash-prompt{
+    margin:36px auto 0; width:fit-content;
+    font-family:'Sora',sans-serif; font-weight:700; font-size:13.5px; color:#fff;
+    padding:12px 26px; border:1px solid var(--border); border-radius:999px; background:rgba(255,255,255,0.06);
+    animation:promptPulse 1.7s ease-in-out infinite;
+  }
+  @keyframes promptPulse{ 0%,100%{ opacity:0.6; transform:scale(1); } 50%{ opacity:1; transform:scale(1.05); } }
+
   /* ---------- in-game HUD ---------- */
   .hud{
     position:absolute; top:0; left:0; right:0;
@@ -211,9 +266,6 @@
   .slider::-moz-range-thumb{
     width:18px; height:18px; border-radius:50%; background:var(--accent1); border:2px solid #fff; cursor:pointer;
   }
-  .music-source-row{ background:var(--surface-hi); border:1px solid var(--border); border-radius:12px; padding:12px; margin-bottom:14px; }
-  .music-source-label{ font-size:12.5px; font-weight:600; margin-bottom:8px; }
-  .music-source-label span{ color:var(--accent2); font-weight:700; }
   .music-hint{ font-size:11px; color:var(--text-dim); margin-top:8px; line-height:1.4; }
   .hidden{ display:none !important; }
 

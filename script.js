@@ -1042,10 +1042,6 @@
     $("#sfxVolume").value = Math.round(save.settings.sfxVol*100);
     $("#musicVolLabel").textContent = Math.round(save.settings.musicVol*100)+"%";
     $("#sfxVolLabel").textContent = Math.round(save.settings.sfxVol*100)+"%";
-    if(activeMusicSource==="file") $("#musicSourceLabel").textContent = "music.mp3";
-    else if(activeMusicSource==="procedural") $("#musicSourceLabel").textContent = "Musique procédurale";
-    else if(activeMusicSource==="custom") { /* keep existing "Test : nom" label */ }
-    else $("#musicSourceLabel").textContent = "Musique procédurale";
     showOverlay("settings");
   };
   $("#closeSettings").onclick = ()=>{ showOverlay("home"); };
@@ -2304,119 +2300,90 @@
     freqs.forEach(f=>playTone(f,dur,type||"sine",(vol||0.06)/Math.sqrt(freqs.length)));
   }
 
-  /* ---- Background music: developer-supplied music.mp3 first, procedural fallback ---- */
-  let musicGain = null, musicTimer = null, musicChordIdx = 0;
-  let customMusicActive = false;
-  let activeMusicSource = null; // 'file' | 'procedural' | 'custom'
-  const MUSIC_CHORDS = [[220,277,330],[196,246,294],[174,220,261],[196,246,294]];
+  /* ---- Background music: a playlist of tracks from the /audio folder, played in sequence ---- */
+  // Add your files to the "audio" folder next to index.html and list their names here, in order.
+  const MUSIC_PLAYLIST = ["audio/ReturnToThe8BitPast(1).mp3", "audio/FunWithMy8BitGame(2).mp3", "audio/ArcadeBeat(3).mp3", "audio/TheReturnOfThe8BitEra(4).mp3", "audio/menu.mp3"];
+  let playlistIndex = 0;
+  let playlistSkips = 0;
 
-  function startProceduralMusic(){
-    if(musicTimer) return;
-    try{
-      const a = ensureCtx();
-      musicGain = a.createGain();
-      musicGain.gain.value = save.settings.musicVol;
-      musicGain.connect(a.destination);
-      const playChordOnce = ()=>{
-        const chord = MUSIC_CHORDS[musicChordIdx % MUSIC_CHORDS.length];
-        musicChordIdx++;
-        chord.forEach((f)=>{
-          const o = a.createOscillator(), g = a.createGain();
-          o.type = "sine"; o.frequency.value = f/2;
-          g.gain.value = 0;
-          o.connect(g); g.connect(musicGain);
-          const t0 = a.currentTime;
-          g.gain.linearRampToValueAtTime(0.16/chord.length, t0+1.2);
-          g.gain.linearRampToValueAtTime(0, t0+3.8);
-          o.start(t0); o.stop(t0+4);
-        });
-      };
-      playChordOnce();
-      musicTimer = setInterval(playChordOnce, 4000);
-      activeMusicSource = "procedural";
-    }catch(e){}
+  function playTrack(index){
+    if(MUSIC_PLAYLIST.length===0) return;
+    playlistIndex = ((index % MUSIC_PLAYLIST.length) + MUSIC_PLAYLIST.length) % MUSIC_PLAYLIST.length;
+    const el = $("#bgMusic");
+    el.src = MUSIC_PLAYLIST[playlistIndex];
+    el.volume = save.settings.musicVol;
+    el.play().catch(()=>{});
   }
-  function stopProceduralMusic(){
-    if(musicTimer){ clearInterval(musicTimer); musicTimer = null; }
-    if(musicGain){ try{ musicGain.disconnect(); }catch(e){} musicGain = null; }
-  }
-
-  function tryLoadFileMusic(){
-    return new Promise(resolve=>{
-      const el = $("#bgMusic");
-      let done = false;
-      const finish = ok=>{ if(done) return; done=true; el.removeEventListener("error",onErr); el.removeEventListener("canplaythrough",onOk); resolve(ok); };
-      const onOk = ()=>finish(true);
-      const onErr = ()=>finish(false);
-      el.addEventListener("canplaythrough", onOk, {once:true});
-      el.addEventListener("error", onErr, {once:true});
-      el.load();
-      setTimeout(()=>finish(false), 1800); // no music.mp3 present / too slow: fall back
-    });
-  }
-
-  async function ensureMusicStarted(){
-    if(activeMusicSource || customMusicActive) return;
-    if(save.settings.musicVol<=0) return;
-    const fileOk = await tryLoadFileMusic();
-    if(activeMusicSource || customMusicActive) return; // state may have changed while awaiting
-    if(fileOk){
-      const el = $("#bgMusic");
-      el.volume = save.settings.musicVol;
-      el.play().then(()=>{
-        activeMusicSource = "file";
-        $("#musicSourceLabel").textContent = "music.mp3";
-      }).catch(()=>{ startProceduralMusic(); });
-    } else {
-      startProceduralMusic();
-    }
-  }
-  ["click","keydown","touchstart"].forEach(evt=>{
-    document.addEventListener(evt, ensureMusicStarted, {once:true});
+  function startPlaylist(){ playlistSkips = 0; playTrack(0); }
+  $("#bgMusic").addEventListener("ended", ()=>{ playlistSkips = 0; playTrack(playlistIndex+1); });
+  $("#bgMusic").addEventListener("error", ()=>{
+    // a listed track is missing or failed to load: skip to the next one instead of going silent
+    playlistSkips++;
+    if(playlistSkips < MUSIC_PLAYLIST.length) playTrack(playlistIndex+1);
   });
 
   function setMusicVolume(v){
     save.settings.musicVol = v;
-    if(musicGain) musicGain.gain.value = v;
-    if(activeMusicSource==="file") $("#bgMusic").volume = v;
-    if(customMusicActive) $("#customAudio").volume = v;
+    $("#bgMusic").volume = v;
+    $("#menuMusic").volume = v;
     persist();
-    if(v>0) ensureMusicStarted();
   }
   function setSfxVolume(v){ save.settings.sfxVol = v; persist(); }
 
-  function useCustomMusicFile(file){
-    stopProceduralMusic();
-    $("#bgMusic").pause();
-    activeMusicSource = null;
-    const audioEl = $("#customAudio");
-    const url = URL.createObjectURL(file);
-    audioEl.src = url;
-    audioEl.loop = true;
-    audioEl.volume = save.settings.musicVol;
-    audioEl.play().catch(()=>{});
-    customMusicActive = true;
-    activeMusicSource = "custom";
-    $("#musicSourceLabel").textContent = "Test : "+file.name;
-    $("#clearMusicFile").classList.remove("hidden");
+  /* ---- Splash / start screen: audio/menu.mp3 plays as soon as the page loads, stops on click ---- */
+  let splashHandled = false;
+  function tryPlayMenuMusic(){
+    const menuEl = $("#menuMusic");
+    if(splashHandled || !menuEl.paused) return;
+    menuEl.volume = save.settings.musicVol;
+    menuEl.play().catch(()=>{
+      // Autoplay blocked by the browser until the page gets any interaction:
+      // retry once on the very first interaction anywhere (not necessarily the splash click).
+    });
   }
-  function clearCustomMusicFile(){
-    const audioEl = $("#customAudio");
-    audioEl.pause();
-    if(audioEl.src){ URL.revokeObjectURL(audioEl.src); audioEl.removeAttribute("src"); audioEl.load(); }
-    customMusicActive = false;
-    activeMusicSource = null;
-    $("#musicSourceLabel").textContent = "Musique procédurale";
-    $("#clearMusicFile").classList.add("hidden");
-    $("#musicFileInput").value = "";
-    ensureMusicStarted();
+  function leaveSplash(){
+    const menuEl = $("#menuMusic");
+    menuEl.pause();
+    menuEl.currentTime = 0;
+    const splash = $("#splashScreen");
+    splash.classList.add("leaving");
+    setTimeout(()=>{
+      splash.classList.add("hidden");
+      startPlaylist();
+    }, 650);
   }
-  $("#chooseMusicFile").onclick = ()=>{ $("#musicFileInput").click(); };
-  $("#musicFileInput").addEventListener("change", (e)=>{
-    const f = e.target.files && e.target.files[0];
-    if(f) useCustomMusicFile(f);
-  });
-  $("#clearMusicFile").onclick = clearCustomMusicFile;
+  function onSplashActivate(){
+    if(splashHandled) return;
+    splashHandled = true;
+    leaveSplash();
+  }
+  function buildSplash(){
+    const titleEl = $("#splashTitle");
+    "Snake+".split("").forEach((ch,i)=>{
+      const span = document.createElement("span");
+      span.className = "letter";
+      span.textContent = ch;
+      span.style.animationDelay = (i*0.08)+"s";
+      titleEl.appendChild(span);
+    });
+    const particles = $("#splashParticles");
+    for(let i=0;i<18;i++){
+      const p = document.createElement("div");
+      p.className = "splash-particle";
+      const size = 2+Math.random()*3;
+      p.style.width = size+"px"; p.style.height = size+"px";
+      p.style.left = Math.random()*100+"%";
+      p.style.animationDuration = (6+Math.random()*6)+"s";
+      p.style.animationDelay = (Math.random()*6)+"s";
+      particles.appendChild(p);
+    }
+    const splash = $("#splashScreen");
+    splash.addEventListener("click", onSplashActivate);
+    splash.addEventListener("touchstart", onSplashActivate, {passive:true});
+    document.addEventListener("keydown", onSplashActivate);
+  }
+  buildSplash();
+  tryPlayMenuMusic();
 
   /* ================= Init ================= */
 

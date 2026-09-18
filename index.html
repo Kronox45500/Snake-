@@ -11,6 +11,18 @@
 </head>
 <body>
 <div class="stage" id="stage">
+  <div class="splash" id="splashScreen">
+    <div class="splash-bg"></div>
+    <div class="splash-particles" id="splashParticles"></div>
+    <div class="splash-content">
+      <div class="splash-snake">🐍</div>
+      <div class="splash-title" id="splashTitle"></div>
+      <div class="splash-tagline">Un serpent, une carrière, des serpents premium à débloquer</div>
+      <div class="splash-prompt">Appuyer pour commencer</div>
+    </div>
+    <audio id="menuMusic" loop preload="auto" style="display:none" src="audio/menu.mp3"></audio>
+  </div>
+
   <canvas id="game"></canvas>
 
   <div class="level-toast" id="levelToast">Niveau 2<small>La cadence s'intensifie</small></div>
@@ -180,17 +192,8 @@
         <div class="volume-label"><span>🎵 Musique</span><span id="musicVolLabel">35%</span></div>
         <input type="range" id="musicVolume" min="0" max="100" value="35" class="slider">
       </div>
-      <div class="music-source-row">
-        <div class="music-source-label">Source : <span id="musicSourceLabel">Musique procédurale</span></div>
-        <div class="row2">
-          <button class="btn secondary small" id="chooseMusicFile">Tester un autre MP3…</button>
-          <button class="btn secondary small hidden" id="clearMusicFile">Retirer</button>
-        </div>
-        <div class="music-hint">Pour ajouter votre propre musique au jeu : placez un fichier nommé <code>music.mp3</code> à côté d'<code>index.html</code> dans le dépôt — il sera chargé automatiquement à l'ouverture. Le bouton ci-dessus ne sert qu'à tester un autre fichier pour la session en cours, sans le sauvegarder.</div>
-        <input type="file" id="musicFileInput" accept="audio/*" style="display:none">
-        <audio id="customAudio" loop style="display:none"></audio>
-        <audio id="bgMusic" loop preload="auto" style="display:none" src="music.mp3"></audio>
-      </div>
+      <div class="music-hint">La musique est chargée depuis le dossier <code>audio/</code> du projet (plusieurs pistes à la suite en boucle) ; l'écran de démarrage joue <code>audio/menu.mp3</code>.</div>
+      <audio id="bgMusic" style="display:none"></audio>
       <div class="volume-row">
         <div class="volume-label"><span>🔊 Effets sonores</span><span id="sfxVolLabel">100%</span></div>
         <input type="range" id="sfxVolume" min="0" max="100" value="100" class="slider">
