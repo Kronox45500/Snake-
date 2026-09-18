@@ -183,12 +183,13 @@
       <div class="music-source-row">
         <div class="music-source-label">Source : <span id="musicSourceLabel">Musique procédurale</span></div>
         <div class="row2">
-          <button class="btn secondary small" id="chooseMusicFile">Choisir un MP3…</button>
+          <button class="btn secondary small" id="chooseMusicFile">Tester un autre MP3…</button>
           <button class="btn secondary small hidden" id="clearMusicFile">Retirer</button>
         </div>
-        <div class="music-hint">Le fichier reste actif pour cette session ; il n'est pas sauvegardé (il faudra le resélectionner après un rechargement de la page).</div>
+        <div class="music-hint">Pour ajouter votre propre musique au jeu : placez un fichier nommé <code>music.mp3</code> à côté d'<code>index.html</code> dans le dépôt — il sera chargé automatiquement à l'ouverture. Le bouton ci-dessus ne sert qu'à tester un autre fichier pour la session en cours, sans le sauvegarder.</div>
         <input type="file" id="musicFileInput" accept="audio/*" style="display:none">
         <audio id="customAudio" loop style="display:none"></audio>
+        <audio id="bgMusic" loop preload="auto" style="display:none" src="music.mp3"></audio>
       </div>
       <div class="volume-row">
         <div class="volume-label"><span>🔊 Effets sonores</span><span id="sfxVolLabel">100%</span></div>

@@ -1042,6 +1042,10 @@
     $("#sfxVolume").value = Math.round(save.settings.sfxVol*100);
     $("#musicVolLabel").textContent = Math.round(save.settings.musicVol*100)+"%";
     $("#sfxVolLabel").textContent = Math.round(save.settings.sfxVol*100)+"%";
+    if(activeMusicSource==="file") $("#musicSourceLabel").textContent = "music.mp3";
+    else if(activeMusicSource==="procedural") $("#musicSourceLabel").textContent = "Musique procédurale";
+    else if(activeMusicSource==="custom") { /* keep existing "Test : nom" label */ }
+    else $("#musicSourceLabel").textContent = "Musique procédurale";
     showOverlay("settings");
   };
   $("#closeSettings").onclick = ()=>{ showOverlay("home"); };
@@ -2300,12 +2304,14 @@
     freqs.forEach(f=>playTone(f,dur,type||"sine",(vol||0.06)/Math.sqrt(freqs.length)));
   }
 
-  /* ---- Procedural ambient background music ---- */
+  /* ---- Background music: developer-supplied music.mp3 first, procedural fallback ---- */
   let musicGain = null, musicTimer = null, musicChordIdx = 0;
   let customMusicActive = false;
+  let activeMusicSource = null; // 'file' | 'procedural' | 'custom'
   const MUSIC_CHORDS = [[220,277,330],[196,246,294],[174,220,261],[196,246,294]];
-  function startMusic(){
-    if(musicTimer || customMusicActive) return;
+
+  function startProceduralMusic(){
+    if(musicTimer) return;
     try{
       const a = ensureCtx();
       musicGain = a.createGain();
@@ -2314,7 +2320,7 @@
       const playChordOnce = ()=>{
         const chord = MUSIC_CHORDS[musicChordIdx % MUSIC_CHORDS.length];
         musicChordIdx++;
-        chord.forEach((f,i)=>{
+        chord.forEach((f)=>{
           const o = a.createOscillator(), g = a.createGain();
           o.type = "sine"; o.frequency.value = f/2;
           g.gain.value = 0;
@@ -2327,29 +2333,62 @@
       };
       playChordOnce();
       musicTimer = setInterval(playChordOnce, 4000);
+      activeMusicSource = "procedural";
     }catch(e){}
   }
   function stopProceduralMusic(){
     if(musicTimer){ clearInterval(musicTimer); musicTimer = null; }
     if(musicGain){ try{ musicGain.disconnect(); }catch(e){} musicGain = null; }
   }
-  function setMusicVolume(v){
-    save.settings.musicVol = v;
-    if(musicGain) musicGain.gain.value = v;
-    const audioEl = $("#customAudio");
-    if(customMusicActive) audioEl.volume = v;
-    persist();
+
+  function tryLoadFileMusic(){
+    return new Promise(resolve=>{
+      const el = $("#bgMusic");
+      let done = false;
+      const finish = ok=>{ if(done) return; done=true; el.removeEventListener("error",onErr); el.removeEventListener("canplaythrough",onOk); resolve(ok); };
+      const onOk = ()=>finish(true);
+      const onErr = ()=>finish(false);
+      el.addEventListener("canplaythrough", onOk, {once:true});
+      el.addEventListener("error", onErr, {once:true});
+      el.load();
+      setTimeout(()=>finish(false), 1800); // no music.mp3 present / too slow: fall back
+    });
   }
-  function setSfxVolume(v){ save.settings.sfxVol = v; persist(); }
-  function ensureMusicStarted(){
-    if(!musicTimer && !customMusicActive && save.settings.musicVol>0) startMusic();
+
+  async function ensureMusicStarted(){
+    if(activeMusicSource || customMusicActive) return;
+    if(save.settings.musicVol<=0) return;
+    const fileOk = await tryLoadFileMusic();
+    if(activeMusicSource || customMusicActive) return; // state may have changed while awaiting
+    if(fileOk){
+      const el = $("#bgMusic");
+      el.volume = save.settings.musicVol;
+      el.play().then(()=>{
+        activeMusicSource = "file";
+        $("#musicSourceLabel").textContent = "music.mp3";
+      }).catch(()=>{ startProceduralMusic(); });
+    } else {
+      startProceduralMusic();
+    }
   }
   ["click","keydown","touchstart"].forEach(evt=>{
     document.addEventListener(evt, ensureMusicStarted, {once:true});
   });
 
+  function setMusicVolume(v){
+    save.settings.musicVol = v;
+    if(musicGain) musicGain.gain.value = v;
+    if(activeMusicSource==="file") $("#bgMusic").volume = v;
+    if(customMusicActive) $("#customAudio").volume = v;
+    persist();
+    if(v>0) ensureMusicStarted();
+  }
+  function setSfxVolume(v){ save.settings.sfxVol = v; persist(); }
+
   function useCustomMusicFile(file){
     stopProceduralMusic();
+    $("#bgMusic").pause();
+    activeMusicSource = null;
     const audioEl = $("#customAudio");
     const url = URL.createObjectURL(file);
     audioEl.src = url;
@@ -2357,7 +2396,8 @@
     audioEl.volume = save.settings.musicVol;
     audioEl.play().catch(()=>{});
     customMusicActive = true;
-    $("#musicSourceLabel").textContent = "Fichier : "+file.name;
+    activeMusicSource = "custom";
+    $("#musicSourceLabel").textContent = "Test : "+file.name;
     $("#clearMusicFile").classList.remove("hidden");
   }
   function clearCustomMusicFile(){
@@ -2365,10 +2405,11 @@
     audioEl.pause();
     if(audioEl.src){ URL.revokeObjectURL(audioEl.src); audioEl.removeAttribute("src"); audioEl.load(); }
     customMusicActive = false;
+    activeMusicSource = null;
     $("#musicSourceLabel").textContent = "Musique procédurale";
     $("#clearMusicFile").classList.add("hidden");
     $("#musicFileInput").value = "";
-    if(save.settings.musicVol>0) startMusic();
+    ensureMusicStarted();
   }
   $("#chooseMusicFile").onclick = ()=>{ $("#musicFileInput").click(); };
   $("#musicFileInput").addEventListener("change", (e)=>{
