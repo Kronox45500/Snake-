@@ -19,27 +19,37 @@
     {id:"tiny", name:"Minuscule", price:300, emoji:"🔹", head:"#9be564", body:"#5a9b34",
       desc:"Ne grandit qu'une fois sur deux : plus facile à manœuvrer longtemps. Corps compact, grands yeux."},
     {id:"lucky", name:"Chanceux", price:650, emoji:"🍀", head:"#ffd25c", body:"#e0a020",
-      desc:"25% de chances qu'une proie rapporte 3x plus de points et 2x plus de pièces. Écailles chatoyantes."}
+      desc:"25% de chances qu'une proie rapporte 3x plus de points et 2x plus de pièces. Écailles chatoyantes."},
+    {id:"camo", name:"Camouflage", price:550, emoji:"🦎", head:"#6b8f5a", body:"#3f5c33",
+      desc:"Les chasseurs ne le repèrent jamais : ils se comportent comme de simples rôdeurs face à lui."},
+    {id:"regen", name:"Régénérateur", price:500, emoji:"🌱", head:"#7fe0a0", body:"#2f8f5c",
+      desc:"Perd automatiquement un anneau tous les 8 fruits, contre un petit bonus de pièces : reste toujours maniable."}
   ];
 
   // Premium snakes: gacha-only, active skill with a dedicated animated button.
   // recharge:true snakes regenerate charges over time during a run (except Ouroboros, a fixed one-shot resource).
   const PREMIUM_SNAKES = [
-    {id:"ouroboros", name:"Ouroboros", emoji:"♾️", head:"#ff8f7a", body:"#7a1f1f", rarity:"Rare", rarityColor:"#33e6c4", weight:38,
+    {id:"ouroboros", name:"Ouroboros", emoji:"♾️", head:"#ff8f7a", body:"#7a1f1f", rarity:"Rare", rarityColor:"#33e6c4", weight:30,
       desc:"Compétence Sacrifice : coupe sa propre queue en deux pour s'échapper d'une situation périlleuse. 2 charges fixes, ne se rechargent pas.",
       skill:{id:"ouroboros", name:"Sacrifice", icon:"✂️", charges:2, recharge:false}},
-    {id:"tempete", name:"Tempête", emoji:"⚡", head:"#eaf6ff", body:"#4fd3ff", rarity:"Rare", rarityColor:"#33e6c4", weight:30,
+    {id:"tempete", name:"Tempête", emoji:"⚡", head:"#eaf6ff", body:"#4fd3ff", rarity:"Rare", rarityColor:"#33e6c4", weight:24,
       desc:"Compétence Éclair : un dash fulgurant qui traverse murs, obstacles et ennemis sans dommage. 2 charges simultanées, se rechargent en 7s chacune.",
       skill:{id:"tempete", name:"Éclair", icon:"⚡", charges:2, maxCharges:2, cooldown:7000, recharge:true}},
-    {id:"nova", name:"Nova", emoji:"☢️", head:"#eaff9e", body:"#9be564", rarity:"Épique", rarityColor:"#7c5cff", weight:18,
+    {id:"titan", name:"Titan", emoji:"🗿", head:"#d8c9a8", body:"#8a7a52", rarity:"Épique", rarityColor:"#7c5cff", weight:15,
+      desc:"Compétence Onde de choc : fige tous les ennemis proches pendant 4 secondes sans les détruire. Se recharge en 16s.",
+      skill:{id:"titan", name:"Onde de choc", icon:"💥", charges:1, maxCharges:1, cooldown:16000, recharge:true}},
+    {id:"nova", name:"Nova", emoji:"☢️", head:"#eaff9e", body:"#9be564", rarity:"Épique", rarityColor:"#7c5cff", weight:14,
       desc:"Compétence Détonation : élimine tous les ennemis et pulvérise les obstacles proches. Se recharge en 18s.",
       skill:{id:"nova", name:"Détonation", icon:"☢️", charges:1, maxCharges:1, cooldown:18000, recharge:true}},
-    {id:"leviathan", name:"Léviathan", emoji:"🌊", head:"#cdefff", body:"#1f6f9b", rarity:"Épique", rarityColor:"#7c5cff", weight:12,
+    {id:"leviathan", name:"Léviathan", emoji:"🌊", head:"#cdefff", body:"#1f6f9b", rarity:"Épique", rarityColor:"#7c5cff", weight:9,
       desc:"Compétence Raz-de-marée : balaie tous les obstacles du terrain. Se recharge en 20s — précieux sur les terrains qui régénèrent leurs obstacles.",
       skill:{id:"leviathan", name:"Raz-de-marée", icon:"🌊", charges:1, maxCharges:1, cooldown:20000, recharge:true}},
     {id:"chronos", name:"Chronos", emoji:"⏳", head:"#e4d9ff", body:"#7c5cff", rarity:"Légendaire", rarityColor:"#ffc94d", weight:2,
       desc:"Compétence Retour temporel : suspend le temps et revient 5 secondes en arrière. Se recharge en 12s.",
-      skill:{id:"chronos", name:"Retour temporel", icon:"⏳", charges:1, maxCharges:1, cooldown:12000, recharge:true}}
+      skill:{id:"chronos", name:"Retour temporel", icon:"⏳", charges:1, maxCharges:1, cooldown:12000, recharge:true}},
+    {id:"mirage", name:"Mirage", emoji:"🌀", head:"#ffd9f0", body:"#c15fae", rarity:"Légendaire", rarityColor:"#ffc94d", weight:2,
+      desc:"Compétence Clone leurre : projette un leurre qui attire tous les chasseurs pendant 5 secondes pendant que vous filez librement. Se recharge en 20s.",
+      skill:{id:"mirage", name:"Clone leurre", icon:"🌀", charges:1, maxCharges:1, cooldown:20000, recharge:true}}
   ];
   const GACHA_COST = 45;
   function rarityClass(r){ return r==="Légendaire"?"legendary":(r==="Épique"?"epic":"rare"); }
@@ -59,7 +69,13 @@
       build:(c,r)=>({obstacles:[],portals:portalPairs(c,r),walls:false,chaos:false})},
     {id:"chaos", name:"Chaos", price:700, tone:"#ff5470", coinMult:2,
       desc:"Les obstacles se déplacent toutes les 12 secondes. Pièces x2.",
-      build:(c,r)=>({obstacles:randomObstacles(c,r,Math.max(6,Math.round(c*r*0.025)),[]),portals:[],walls:false,chaos:true})}
+      build:(c,r)=>({obstacles:randomObstacles(c,r,Math.max(6,Math.round(c*r*0.025)),[]),portals:[],walls:false,chaos:true})},
+    {id:"ice", name:"Glace", price:850, tone:"#9be3ff", coinMult:1.9, ice:true,
+      desc:"Le sol glisse : chaque virage met un instant à répondre. Pièces x1.9.",
+      build:(c,r)=>({obstacles:[],portals:[],walls:false,chaos:false,ice:true})},
+    {id:"eclipse", name:"Éclipse", price:950, tone:"#3a2a5c", coinMult:2.1, fog:true,
+      desc:"Visibilité réduite à un halo autour de la tête. Pièces x2.1.",
+      build:(c,r)=>({obstacles:[],portals:[],walls:false,chaos:false,fog:true})}
   ];
 
   const ITEMS = [
@@ -125,37 +141,37 @@
       choiceA:{title:"Entre quatre murs", goal:8, walls:true},
       choiceB:{title:"Chrono", goal:10, timeLimit:40},
       stage4:{title:"Terrain accidenté", goal:12, mazeLight:true},
-      boss:{title:"Boss : Le Glouton", goal:20, speedStart:140} },
+      boss:{title:"Boss : Le Glouton", goal:20, speedStart:140, enemies:[{type:"boss"}]} },
     { stage1:{title:"Couloirs", goal:12, maze:true},
       stage2:{title:"Contre la montre", goal:12, timeLimit:45, walls:true},
       choiceA:{title:"Dans le vif du sujet", goal:12, maze:true, timeLimit:60},
       choiceB:{title:"Premier danger", goal:10, enemies:[{type:"wanderer"}]},
       stage4:{title:"Duo de rôdeurs", goal:14, enemies:[{type:"wanderer"},{type:"wanderer"}]},
-      boss:{title:"Boss : Le Labyrinthe Vivant", goal:16, maze:true, timeLimit:55} },
+      boss:{title:"Boss : Le Labyrinthe Vivant", goal:16, maze:true, timeLimit:55, enemies:[{type:"boss"}]} },
     { stage1:{title:"Prédateur", goal:10, enemies:[{type:"hunter"}]},
       stage2:{title:"Traqué entre les murs", goal:12, walls:true, enemies:[{type:"hunter"}]},
       choiceA:{title:"Chasse dans le labyrinthe", goal:14, maze:true, enemies:[{type:"wanderer"}]},
       choiceB:{title:"Sprint sous tension", goal:14, timeLimit:50, enemies:[{type:"hunter"}]},
       stage4:{title:"Double menace", goal:16, enemies:[{type:"wanderer"},{type:"hunter"}]},
-      boss:{title:"Boss : La Meute", goal:18, enemies:[{type:"wanderer"},{type:"wanderer"},{type:"hunter"}]} },
+      boss:{title:"Boss : La Meute", goal:18, enemies:[{type:"boss"},{type:"hunter"}]} },
     { stage1:{title:"Portails", goal:12, portal:true},
       stage2:{title:"Sauts chronométrés", goal:14, portal:true, timeLimit:55},
       choiceA:{title:"Portails et rôdeur", goal:14, portal:true, enemies:[{type:"wanderer"}]},
       choiceB:{title:"Portails muraillés", goal:16, portal:true, walls:true},
       stage4:{title:"Chasseur téléporté", goal:16, portal:true, enemies:[{type:"hunter"}]},
-      boss:{title:"Boss : Le Gardien des Portails", goal:18, portal:true, walls:true, enemies:[{type:"hunter"}], timeLimit:65} },
+      boss:{title:"Boss : Le Gardien des Portails", goal:18, portal:true, walls:true, enemies:[{type:"boss"}], timeLimit:65} },
     { stage1:{title:"Chaos", goal:14, chaos:true},
       stage2:{title:"Chaos chronométré", goal:16, chaos:true, timeLimit:60},
       choiceA:{title:"Chaos et rôdeur", goal:16, chaos:true, enemies:[{type:"wanderer"}]},
       choiceB:{title:"Chaos et chasseur", goal:18, chaos:true, enemies:[{type:"hunter"}]},
       stage4:{title:"Chaos enfermé", goal:18, chaos:true, walls:true, enemies:[{type:"wanderer"}]},
-      boss:{title:"Boss : Le Cœur du Chaos", goal:20, chaos:true, walls:true, enemies:[{type:"wanderer"},{type:"hunter"}], timeLimit:70} },
+      boss:{title:"Boss : Le Cœur du Chaos", goal:20, chaos:true, walls:true, enemies:[{type:"boss"}], timeLimit:70} },
     { stage1:{title:"Convergence", goal:16, mazeLight:true, walls:true, enemies:[{type:"wanderer"},{type:"hunter"}], timeLimit:70},
       stage2:{title:"Duplication", goal:18, portal:true, enemies:[{type:"wanderer"},{type:"wanderer"}], timeLimit:65},
       choiceA:{title:"Le chaos redouble", goal:18, chaos:true, walls:true, enemies:[{type:"hunter"},{type:"hunter"}]},
       choiceB:{title:"Dernière ligne droite", goal:20, mazeLight:true, portal:true, enemies:[{type:"wanderer"}], timeLimit:75},
       stage4:{title:"Épreuve ultime", goal:22, chaos:true, mazeLight:true, walls:true, enemies:[{type:"wanderer"},{type:"wanderer"},{type:"hunter"}], timeLimit:90},
-      boss:{title:"Boss final : L'Ultime Épreuve", goal:26, chaos:true, mazeLight:true, walls:true, portal:true, enemies:[{type:"wanderer"},{type:"wanderer"},{type:"hunter"}], timeLimit:100} }
+      boss:{title:"Boss final : L'Ultime Épreuve", goal:26, chaos:true, mazeLight:true, walls:true, portal:true, enemies:[{type:"boss"},{type:"hunter"}], timeLimit:100} }
   ];
 
   function autoDesc(spec){
@@ -170,8 +186,10 @@
     if(spec.enemies && spec.enemies.length){
       const w = spec.enemies.filter(e=>e.type==="wanderer").length;
       const h = spec.enemies.filter(e=>e.type==="hunter").length;
+      const b = spec.enemies.filter(e=>e.type==="boss").length;
       if(w) hazards.push(w+" rôdeur"+(w>1?"s":""));
       if(h) hazards.push(h+" chasseur"+(h>1?"s":""));
+      if(b) hazards.push("un boss");
     }
     if(hazards.length) s += " avec "+hazards.join(", ");
     return s+".";
@@ -321,17 +339,22 @@
 
   /* ================= Save data ================= */
 
-  const SAVE_KEY = "snakeplus_save_v7";
+  const SAVE_KEY = "snakeplus_save_v8";
   function defaultSave(){
     return {
-      coins:15, crystals:0, best:0, bestLevel:1,
+      coins:15, crystals:0, best:0, bestLevel:1, bestChrono:0,
       xp:0, playerLevel:1,
       ownedSnakes:["classic"], ownedMaps:["classic"],
       selectedSnake:"classic", selectedMap:"classic",
       inventory:{magnet:0, slow:0, shield:0, coinrush:0, scoresurge:0, detonator:0},
       loadout:[],
       career:{stars:{}, completed:[]},
-      keybinds:Object.assign({}, DEFAULT_KEYBINDS)
+      keybinds:Object.assign({}, DEFAULT_KEYBINDS),
+      snakeUpgrades:{},
+      stats:{totalFruits:0, totalGames:0, totalDeaths:0, totalCareerWins:0, bestCombo:0, gachaPulls:0},
+      achievements:[],
+      daily:{date:"", fruitsToday:0, gamesToday:0, bestComboToday:0, claimed:[]},
+      settings:{musicVol:0.35, sfxVol:1}
     };
   }
   let save = load();
@@ -344,14 +367,131 @@
       merged.inventory = Object.assign(defaultSave().inventory, parsed.inventory||{});
       merged.career = Object.assign(defaultSave().career, parsed.career||{});
       merged.keybinds = Object.assign(Object.assign({}, DEFAULT_KEYBINDS), parsed.keybinds||{});
+      merged.snakeUpgrades = Object.assign({}, parsed.snakeUpgrades||{});
+      merged.stats = Object.assign(defaultSave().stats, parsed.stats||{});
+      merged.daily = Object.assign(defaultSave().daily, parsed.daily||{});
+      merged.settings = Object.assign(defaultSave().settings, parsed.settings||{});
+      merged.achievements = parsed.achievements||[];
       return merged;
     }catch(e){ return defaultSave(); }
   }
   function persist(){ try{ localStorage.setItem(SAVE_KEY, JSON.stringify(save)); }catch(e){} }
 
+  function todayStr(){ return new Date().toISOString().slice(0,10); }
+  function ensureDaily(){
+    const t = todayStr();
+    if(save.daily.date!==t){
+      save.daily = {date:t, fruitsToday:0, gamesToday:0, bestComboToday:0, claimed:[]};
+      persist();
+    }
+  }
+
+  /* ---- Snake upgrades (spend coins to permanently boost an owned snake) ---- */
+  function getUpgradeLevel(id){ return save.snakeUpgrades[id]||0; }
+  function upgradeCost(level){ return 80*(level+1); }
+  const MAX_UPGRADE = 5;
+
   function getSnake(id){ return SNAKES.find(s=>s.id===id) || PREMIUM_SNAKES.find(s=>s.id===id); }
   function getMap(id){ return MAPS.find(m=>m.id===id); }
   function getItem(id){ return ITEMS.find(i=>i.id===id); }
+
+  /* ================= Achievements & daily challenges ================= */
+
+  const ACHIEVEMENTS = [
+    {id:"first_bite", name:"Première bouchée", icon:"🍎", desc:"Manger votre tout premier fruit.", reward:{coins:10}, check:s=>s.stats.totalFruits>=1},
+    {id:"hundred", name:"Gourmand", icon:"🍽️", desc:"Manger 100 fruits au total.", reward:{coins:40,xp:20}, check:s=>s.stats.totalFruits>=100},
+    {id:"fivehundred", name:"Glouton insatiable", icon:"🐍", desc:"Manger 500 fruits au total.", reward:{coins:120,crystals:2,xp:50}, check:s=>s.stats.totalFruits>=500},
+    {id:"combo5", name:"Combo parfait", icon:"⚡", desc:"Atteindre un combo x5.", reward:{coins:30,xp:15}, check:s=>s.stats.bestCombo>=5},
+    {id:"first_star", name:"Première étoile", icon:"⭐", desc:"Terminer un niveau de carrière.", reward:{coins:20,xp:10}, check:s=>s.career.completed.length>=1},
+    {id:"ten_levels", name:"Sur la bonne voie", icon:"🧭", desc:"Terminer 10 niveaux de carrière.", reward:{coins:80,crystals:2,xp:30}, check:s=>s.career.completed.length>=10},
+    {id:"chapter1", name:"Chapitre bouclé", icon:"🏁", desc:"Terminer tout le premier chapitre.", reward:{coins:60,crystals:2,xp:25}, check:s=>[1,2,3,4,5,6].every(id=>s.career.completed.includes(id))},
+    {id:"boss_slayer", name:"Chasseur de boss", icon:"👑", desc:"Vaincre un boss de carrière.", reward:{coins:80,crystals:3,xp:30}, check:s=>[6,12,18,24,30,36].some(id=>s.career.completed.includes(id))},
+    {id:"all_bosses", name:"Fléau des boss", icon:"💀", desc:"Vaincre tous les boss de la carrière.", reward:{coins:250,crystals:8,xp:100}, check:s=>[6,12,18,24,30,36].every(id=>s.career.completed.includes(id))},
+    {id:"gacha_first", name:"Un tour de manège", icon:"🎰", desc:"Faire votre premier tirage gacha.", reward:{coins:15}, check:s=>s.stats.gachaPulls>=1},
+    {id:"legendary", name:"Coup de chance", icon:"🌟", desc:"Obtenir un serpent premium Légendaire.", reward:{coins:100,xp:40}, check:s=>s.ownedSnakes.includes("chronos")||s.ownedSnakes.includes("mirage")},
+    {id:"collection", name:"Collection complète", icon:"📚", desc:"Posséder les 10 serpents de base.", reward:{coins:150,crystals:4,xp:50}, check:s=>SNAKES.every(sk=>s.ownedSnakes.includes(sk.id))},
+    {id:"rank_gold", name:"Rang Or", icon:"🥇", desc:"Atteindre le rang Or (niveau 10).", reward:{coins:60,crystals:2}, check:s=>s.playerLevel>=10},
+    {id:"rank_master", name:"Rang Maître", icon:"🏆", desc:"Atteindre le rang Maître (niveau 25).", reward:{coins:300,crystals:10,xp:0}, check:s=>s.playerLevel>=25},
+    {id:"veteran", name:"Vétéran", icon:"🎖️", desc:"Jouer 50 parties au total (libre, chrono ou carrière).", reward:{coins:100,xp:40}, check:s=>s.stats.totalGames>=50},
+    {id:"flawless", name:"Sans faille", icon:"✨", desc:"Terminer un niveau de carrière avec 3 étoiles.", reward:{coins:40,xp:15}, check:s=>Object.values(s.career.stars).some(v=>v>=3)}
+  ];
+
+  function checkAchievements(){
+    let any = false;
+    ACHIEVEMENTS.forEach(a=>{
+      if(save.achievements.includes(a.id)) return;
+      if(!a.check(save)) return;
+      save.achievements.push(a.id);
+      if(a.reward.coins) save.coins += a.reward.coins;
+      if(a.reward.crystals) save.crystals += a.reward.crystals;
+      persist();
+      if(a.reward.xp) addXp(a.reward.xp);
+      showAchievementToast(a);
+      any = true;
+    });
+    if(any){ persist(); renderTopbar(); }
+  }
+  function showAchievementToast(a){
+    const el = $("#xpToast");
+    el.innerHTML = a.icon+" Succès débloqué<small>"+a.name+"</small>";
+    el.classList.add("show");
+    clearTimeout(el._t);
+    el._t = setTimeout(()=>el.classList.remove("show"), 2200);
+    playChord([523,659],0.3,0.07,"triangle");
+  }
+
+  const DAILY_DEFS = [
+    {id:"d_fruits", name:"Panier garni", desc:"Manger 20 fruits aujourd'hui.", reward:{coins:15,crystals:1}, goal:20, progress:s=>s.daily.fruitsToday},
+    {id:"d_games", name:"Échauffement", desc:"Terminer 1 partie aujourd'hui (libre, chrono ou carrière).", reward:{coins:10}, goal:1, progress:s=>s.daily.gamesToday},
+    {id:"d_combo", name:"Enchaînement", desc:"Réussir un combo x3 ou plus aujourd'hui.", reward:{coins:15,crystals:1}, goal:3, progress:s=>s.daily.bestComboToday}
+  ];
+  function renderDaily(){
+    ensureDaily();
+    const list = $("#dailyList");
+    list.innerHTML = "";
+    DAILY_DEFS.forEach(d=>{
+      const prog = Math.min(d.goal, d.progress(save));
+      const done = prog>=d.goal;
+      const claimed = save.daily.claimed.includes(d.id);
+      const row = document.createElement("div");
+      row.className = "card";
+      row.innerHTML = `
+        <div class="swatch" style="background:var(--surface);border:1px solid var(--border);font-size:16px;">${claimed?'✅':(done?'🎁':'📅')}</div>
+        <div class="info">
+          <div class="t">${d.name}</div>
+          <div class="d">${d.desc} (${prog}/${d.goal})</div>
+        </div>
+        <div class="action"></div>`;
+      const btn = document.createElement("button");
+      btn.className = "buy-btn"+(claimed?" owned":"");
+      if(claimed){ btn.textContent="Reçu"; btn.disabled=true; }
+      else if(done){ btn.textContent="Réclamer"; btn.onclick=()=>{
+          save.daily.claimed.push(d.id);
+          if(d.reward.coins) save.coins+=d.reward.coins;
+          if(d.reward.crystals) save.crystals+=d.reward.crystals;
+          persist(); renderTopbar(); renderDaily();
+        }; }
+      else { btn.textContent="En cours"; btn.disabled=true; }
+      row.querySelector(".action").appendChild(btn);
+      list.appendChild(row);
+    });
+  }
+  function renderAchievementsList(){
+    const list = $("#achievementsList");
+    list.innerHTML = "";
+    ACHIEVEMENTS.forEach(a=>{
+      const unlocked = save.achievements.includes(a.id);
+      const row = document.createElement("div");
+      row.className = "card"+(unlocked?"":" locked-ach");
+      row.innerHTML = `
+        <div class="swatch" style="background:${unlocked?'var(--accent-grad)':'var(--surface)'};color:${unlocked?'#0a0c12':'var(--text-dim)'};border:${unlocked?'none':'1px solid var(--border)'};">${unlocked?a.icon:'🔒'}</div>
+        <div class="info">
+          <div class="t">${a.name}</div>
+          <div class="d">${a.desc}</div>
+        </div>`;
+      list.appendChild(row);
+    });
+  }
 
   /* ================= DOM refs ================= */
 
@@ -360,7 +500,7 @@
   const stage = $("#stage");
   const overlays = {
     home: $("#overlay-home"), shop: $("#overlay-shop"), settings: $("#overlay-settings"), gacha: $("#overlay-gacha"),
-    ranks: $("#overlay-ranks"),
+    ranks: $("#overlay-ranks"), achievements: $("#overlay-achievements"),
     pause: $("#overlay-pause"), gameover: $("#overlay-gameover"),
     levelintro: $("#overlay-levelintro"), levelresult: $("#overlay-levelresult")
   };
@@ -371,6 +511,21 @@
   }
   $("#closeRanks").onclick = ()=>{ showOverlay("home"); };
   $("#rankBadge").onclick = ()=>{ renderRanksList(); showOverlay("ranks"); };
+
+  let achTab = "daily";
+  function renderAchievementsOverlay(){
+    ensureDaily();
+    document.querySelectorAll(".ach-tab").forEach(t=>t.classList.toggle("active", t.dataset.achtab===achTab));
+    $("#dailyPanel").classList.toggle("panel-hidden", achTab!=="daily");
+    $("#achPanel").classList.toggle("panel-hidden", achTab!=="list");
+    renderDaily();
+    renderAchievementsList();
+  }
+  document.querySelectorAll(".ach-tab").forEach(t=>{
+    t.onclick = ()=>{ achTab = t.dataset.achtab; renderAchievementsOverlay(); };
+  });
+  $("#openAchievements").onclick = ()=>{ achTab="daily"; renderAchievementsOverlay(); showOverlay("achievements"); };
+  $("#closeAchievements").onclick = ()=>{ showOverlay("home"); };
 
   /* ================= Responsive grid-aligned canvas ================= */
 
@@ -416,13 +571,20 @@
   }
 
   let homeTab = "free";
+  function updatePlayButtonLabel(){
+    const btn = $("#playBtn");
+    if(homeTab==="chrono") btn.textContent = "Jouer en Chrono (60s)";
+    else if(homeTab==="zen") btn.textContent = "Jouer en Zen";
+    else btn.textContent = "Jouer en libre";
+  }
   document.querySelectorAll(".modetab").forEach(t=>{
     t.onclick = ()=>{
       homeTab = t.dataset.mode;
       document.querySelectorAll(".modetab").forEach(x=>x.classList.toggle("active", x===t));
-      $("#freePanel").classList.toggle("panel-hidden", homeTab!=="free");
+      $("#freePanel").classList.toggle("panel-hidden", homeTab==="career");
       $("#careerPanel").classList.toggle("panel-hidden", homeTab!=="career");
       if(homeTab==="career") renderCareerOverview();
+      updatePlayButtonLabel();
     };
   });
 
@@ -459,6 +621,7 @@
     }
     renderRank();
     renderCareerOverview();
+    updatePlayButtonLabel();
   }
 
   /* ---- Career path UI: one continuous scrollable tree across all chapters ---- */
@@ -663,6 +826,44 @@
         if(save.coins < it.price) btn.disabled = true;
         list.appendChild(card);
       });
+    } else if(shopTab==="upgrade"){
+      const owned = [].concat(SNAKES.filter(s=>save.ownedSnakes.includes(s.id)), PREMIUM_SNAKES.filter(s=>save.ownedSnakes.includes(s.id)));
+      owned.forEach(sk=>{
+        const lvl = getUpgradeLevel(sk.id);
+        const maxed = lvl>=MAX_UPGRADE;
+        const cost = upgradeCost(lvl);
+        const isPremium = !!sk.skill;
+        const effect = isPremium
+          ? "+4% pièces, -7% recharge par niveau"+(lvl>=4?" (charge bonus active)":"")+" par niveau"
+          : "+4% de pièces gagnées par niveau avec ce serpent";
+        const card = document.createElement("div");
+        card.className = "card";
+        card.innerHTML = `
+          <div class="swatch" style="background:${sk.body}">${sk.emoji}</div>
+          <div class="info">
+            <div class="t">${sk.name} <span class="mult-badge">${"●".repeat(lvl)}${"○".repeat(MAX_UPGRADE-lvl)}</span></div>
+            <div class="d">${effect}</div>
+          </div>
+          <div class="action"><button class="buy-btn">${maxed?"Max":cost+" 🪙"}</button></div>`;
+        const btn = card.querySelector(".buy-btn");
+        if(maxed){ btn.disabled = true; btn.className += " owned"; }
+        else {
+          if(save.coins < cost) btn.disabled = true;
+          btn.onclick = ()=>{
+            if(save.coins < cost) return;
+            save.coins -= cost;
+            save.snakeUpgrades[sk.id] = lvl+1;
+            persist(); renderShop(); renderTopbar();
+          };
+        }
+        list.appendChild(card);
+      });
+      if(owned.length===0){
+        const empty = document.createElement("div");
+        empty.className = "gacha-hint";
+        empty.textContent = "Débloquez au moins un serpent pour commencer à l'améliorer.";
+        list.appendChild(empty);
+      }
     } else if(shopTab==="gacha"){
       const info = document.createElement("div");
       info.className = "card gacha-panel";
@@ -748,8 +949,10 @@
     let msg;
     if(isNew){ save.ownedSnakes.push(picked.id); msg = picked.desc; }
     else { const bonus = 120; save.coins += bonus; msg = "Doublon converti en +"+bonus+" pièces."; }
+    save.stats.gachaPulls++;
     persist();
     renderTopbar();
+    checkAchievements();
 
     playCapsuleSequence(picked, isNew, msg);
   }
@@ -833,9 +1036,18 @@
     bindingTarget = null;
     renderSettings();
   }, true);
-  $("#openSettings").onclick = ()=>{ renderSettings(); showOverlay("settings"); };
+  $("#openSettings").onclick = ()=>{
+    renderSettings();
+    $("#musicVolume").value = Math.round(save.settings.musicVol*100);
+    $("#sfxVolume").value = Math.round(save.settings.sfxVol*100);
+    $("#musicVolLabel").textContent = Math.round(save.settings.musicVol*100)+"%";
+    $("#sfxVolLabel").textContent = Math.round(save.settings.sfxVol*100)+"%";
+    showOverlay("settings");
+  };
   $("#closeSettings").onclick = ()=>{ showOverlay("home"); };
   $("#resetBinds").onclick = ()=>{ save.keybinds = Object.assign({}, DEFAULT_KEYBINDS); persist(); renderSettings(); };
+  $("#musicVolume").addEventListener("input", (e)=>{ setMusicVolume(e.target.value/100); $("#musicVolLabel").textContent = e.target.value+"%"; });
+  $("#sfxVolume").addEventListener("input", (e)=>{ setSfxVolume(e.target.value/100); $("#sfxVolLabel").textContent = e.target.value+"%"; });
 
   /* ================= Secret unlock-all ================= */
 
@@ -860,16 +1072,19 @@
   /* ================= Game engine ================= */
 
   let state = "home"; // home | playing | paused | gameover | levelresult
-  let mode = "free"; // free | career
+  let mode = "free"; // free | chrono | zen | career
   let selectedLevelId = 1;
-  let snakeDef, mapDef, obstacles, portals, hasWalls, isChaos, chaosTimer;
+  let snakeDef, mapDef, obstacles, portals, hasWalls, isChaos, isIce, isFog, chaosTimer;
+  let iceSkip = 0;
   let snake, dir, nextDir, food, tickMs, acc, lastTime, rafId;
   let score, coinsThisRun, foodEaten, curLevel;
   let currentLevel, fruitsThisLevel, levelStartTime, pauseOffset, pauseBeganAt, timeLimitMs;
+  let chronoStartTime, chronoDuration;
   let usedShieldOrTank, shieldCharge, magnetUntil, slowUntil, coinRushOn, scoreSurgeOn;
-  let comboMult, lastEatTime, growToggle;
+  let comboMult, lastEatTime, growToggle, regenCounter;
   let runLoadout, loadoutUsed;
   let enemies, enemyTickCounter;
+  let decoy = null;
   let particles = [];
   let soundOn = true;
   let history = [];
@@ -886,14 +1101,15 @@
     dir = {x:1,y:0}; nextDir = {x:1,y:0};
     usedShieldOrTank = false; shieldCharge = false;
     magnetUntil = 0; slowUntil = 0; coinRushOn = false; scoreSurgeOn = false;
-    comboMult = 1; lastEatTime = 0; growToggle = false;
-    particles = []; enemies = []; enemyTickCounter = 0;
+    comboMult = 1; lastEatTime = 0; growToggle = false; regenCounter = 0;
+    particles = []; enemies = []; enemyTickCounter = 0; decoy = null;
     history = []; skillFx = null; freezeUntil = 0; chronosPending = null;
 
     if(snakeDef.skill){
-      skillCharges = snakeDef.skill.charges;
-      skillMaxCharges = snakeDef.skill.maxCharges!=null ? snakeDef.skill.maxCharges : snakeDef.skill.charges;
-      skillCooldownMs = snakeDef.skill.cooldown || 0;
+      const lvl = getUpgradeLevel(snakeDef.id);
+      skillCharges = snakeDef.skill.charges + (snakeDef.skill.recharge && lvl>=4 ? 1 : 0);
+      skillMaxCharges = (snakeDef.skill.maxCharges!=null ? snakeDef.skill.maxCharges : snakeDef.skill.charges) + (snakeDef.skill.recharge && lvl>=4 ? 1 : 0);
+      skillCooldownMs = Math.round((snakeDef.skill.cooldown || 0) * (1 - 0.07*lvl));
       skillNextReadyAt = 0;
     } else {
       skillCharges = 0; skillMaxCharges = 0; skillCooldownMs = 0; skillNextReadyAt = 0;
@@ -912,14 +1128,16 @@
     while(history.length && history[0].t<cutoff) history.shift();
   }
 
-  function startRun(){
-    mode = "free";
+  function startRun(runMode){
+    mode = runMode || "free";
     snakeDef = getSnake(save.selectedSnake);
     mapDef = getMap(save.selectedMap);
     commonSetup();
     const built = mapDef.build(COLS, ROWS);
     obstacles = built.obstacles; portals = built.portals; hasWalls = built.walls; isChaos = built.chaos;
+    isIce = !!built.ice; isFog = !!built.fog; iceSkip = 0;
     score = 0; coinsThisRun = 0; foodEaten = 0; curLevel = 1;
+    pauseOffset = 0; pauseBeganAt = 0;
     tickMs = 150;
     placeFood();
     pushHistorySnapshot();
@@ -931,8 +1149,10 @@
         obstacles = randomObstacles(COLS, ROWS, obstacles.length, [snake[0]]);
       }, 12000);
     }
+    if(mode==="chrono"){ chronoStartTime = performance.now(); chronoDuration = 60000; }
     beginPlay();
-    $("#modeChip").textContent = "Niv. 1";
+    $("#modeChip").textContent = mode==="zen" ? "Zen" : (mode==="chrono" ? "60s" : "Niv. 1");
+    $("#modeChip").classList.remove("low");
   }
 
   function startLevel(levelId){
@@ -1065,11 +1285,19 @@
         const elapsed = performance.now()-levelStartTime-pauseOffset;
         if(elapsed >= timeLimitMs){ failLevel("timeout"); return; }
       }
+    } else if(mode==="chrono"){
+      const elapsed = now-chronoStartTime-pauseOffset;
+      const remain = Math.max(0, Math.ceil((chronoDuration-elapsed)/1000));
+      const chip = $("#modeChip");
+      chip.textContent = "⏱ "+remain+"s";
+      chip.classList.toggle("low", remain<=10);
+      if(elapsed >= chronoDuration){ endChrono(); return; }
     }
     draw();
   }
 
   function checkHazard(){
+    if(mode==="zen") return false;
     if(shieldCharge){ shieldCharge=false; markLoadoutUsed("shield"); return false; }
     if(snakeDef.id==="tank" && !usedShieldOrTank){ usedShieldOrTank=true; renderPowerbar(); return false; }
     return true;
@@ -1080,7 +1308,12 @@
   }
 
   function tickGame(){
-    dir = nextDir;
+    if(isIce){
+      iceSkip = 1-iceSkip;
+      if(iceSkip===0) dir = nextDir;
+    } else {
+      dir = nextDir;
+    }
     let head = [snake[0][0]+dir.x, snake[0][1]+dir.y];
 
     if(hasWalls && snakeDef.id!=="ghost"){
@@ -1143,42 +1376,79 @@
     if(snakeDef.id==="golden") coins *= 2;
     if(coinRushOn) coins *= 3;
     if(luckyBonus) coins *= 2;
-    if(mode==="free") coins = coins * mapDef.coinMult;
+    if(mode==="free"||mode==="chrono"||mode==="zen") coins = coins * mapDef.coinMult;
+    coins *= (1 + 0.04*getUpgradeLevel(snakeDef.id));
     coins = Math.round(coins);
 
-    if(mode==="free"){ score += pts; coinsThisRun += coins; save.coins += coins; }
-    else { coinsThisRun = (coinsThisRun||0) + coins; save.coins += coins; fruitsThisLevel++; }
+    if(mode==="career"){ coinsThisRun = (coinsThisRun||0) + coins; save.coins += coins; fruitsThisLevel++; }
+    else { score += pts; coinsThisRun += coins; save.coins += coins; }
+
+    ensureDaily();
+    save.stats.totalFruits++;
+    save.daily.fruitsToday++;
+    if(comboMult > save.stats.bestCombo) save.stats.bestCombo = comboMult;
+    if(comboMult > save.daily.bestComboToday) save.daily.bestComboToday = comboMult;
+
+    if(snakeDef.id==="regen"){
+      regenCounter++;
+      if(regenCounter%8===0 && snake.length>4){
+        snake.pop();
+        save.coins += 3;
+      }
+    }
 
     spawnParticles(food[0], food[1], luckyBonus?"#ffc94d":"#ff9f43", luckyBonus?16:10);
     renderTopbar();
     updateComboTag();
     beep(luckyBonus?1100:880, 0.07, "sine");
+    checkAchievements();
 
-    if(mode==="free"){
-      foodEaten++;
-      const newLevel = 1 + Math.floor(foodEaten/FOOD_PER_LEVEL);
-      if(newLevel > curLevel){ curLevel = newLevel; applyFreeLevelUp(); }
-      tickMs = Math.max(70, tickMs-2);
+    if(mode==="career"){
+      if(fruitsThisLevel >= currentLevel.goal){ placeFood(); winLevel(); return; }
       placeFood();
     } else {
-      if(fruitsThisLevel >= currentLevel.goal){ placeFood(); winLevel(); return; }
+      foodEaten++;
+      const newLevel = 1 + Math.floor(foodEaten/FOOD_PER_LEVEL);
+      if(newLevel > curLevel && mode!=="chrono"){ curLevel = newLevel; applyFreeLevelUp(); }
+      tickMs = Math.max(70, tickMs-2);
       placeFood();
     }
   }
 
   function updateComboTag(){
     const tag = $("#comboTag");
-    if(comboMult>1 && mode==="free"){ tag.textContent = "x"+comboMult+" combo"; tag.classList.add("show"); }
+    if(comboMult>1 && mode!=="career"){ tag.textContent = "x"+comboMult+" combo"; tag.classList.add("show"); }
     else { tag.classList.remove("show"); }
   }
 
   function moveEnemies(){
+    const now = performance.now();
     enemies.forEach(e=>{
+      if(e.stunnedUntil && now<e.stunnedUntil) return;
+      if(e.type==="boss"){
+        if(!e._moveCounter) e._moveCounter=0;
+        e._moveCounter++;
+        if(e._moveCounter%3!==0) return; // boss moves slower, every 3rd enemy tick
+        if(!e.nextTelegraph) e.nextTelegraph = now+5500;
+        if(now>=e.nextTelegraph && !e.telegraphing){
+          e.telegraphing = true; e.telegraphUntil = now+900;
+        }
+        if(e.telegraphing && now>=e.telegraphUntil){
+          e.telegraphing = false; e.nextTelegraph = now+5500;
+          for(let k=0;k<2;k++){
+            const c = randFreeCell(3);
+            if(c) obstacles.push(c);
+          }
+        }
+      }
       let dirs = [[1,0],[-1,0],[0,1],[0,-1]];
-      if(e.type==="hunter"){
+      const targetPoint = (decoy && now<decoy.until) ? [decoy.x, decoy.y] : [snake[0][0], snake[0][1]];
+      const isChaser = e.type==="hunter" || e.type==="boss";
+      const evaded = snakeDef.id==="camo" && e.type==="hunter" && !(decoy && now<decoy.until);
+      if(isChaser && !evaded){
         dirs.sort((a,b)=>{
-          const da = Math.abs((e.x+a[0])-snake[0][0])+Math.abs((e.y+a[1])-snake[0][1]);
-          const db = Math.abs((e.x+b[0])-snake[0][0])+Math.abs((e.y+b[1])-snake[0][1]);
+          const da = Math.abs((e.x+a[0])-targetPoint[0])+Math.abs((e.y+a[1])-targetPoint[1]);
+          const db = Math.abs((e.x+b[0])-targetPoint[0])+Math.abs((e.y+b[1])-targetPoint[1]);
           return da-db;
         });
       } else { dirs.sort(()=>Math.random()-0.5); }
@@ -1196,24 +1466,53 @@
     }
   }
 
-  function endRun(reason){ if(mode==="free") die(); else failLevel("died"); }
+  function endRun(reason){
+    if(mode==="career") failLevel("died");
+    else if(mode==="chrono") endChrono();
+    else die();
+  }
 
   function die(){
     state = "gameover";
     $("#hud").classList.add("hidden");
     $("#controlsBar").classList.add("hidden");
-    if(score > save.best){ save.best = score; }
-    if(save.bestLevel < curLevel){ save.bestLevel = curLevel; }
+    if(mode==="free" && score > save.best){ save.best = score; }
+    if(mode==="free" && save.bestLevel < curLevel){ save.bestLevel = curLevel; }
     save.crystals += Math.floor(score/150);
+    ensureDaily();
+    save.stats.totalGames++; save.stats.totalDeaths++; save.daily.gamesToday++;
     addXp(Math.floor(score/4)+coinsThisRun);
     persist();
     renderTopbar();
+    checkAchievements();
     $("#finalScore").textContent = score;
-    const newRecord = score>0 && score===save.best;
-    $("#goDetails").innerHTML = "+"+coinsThisRun+" pièces · niveau "+curLevel+(newRecord? ' · <span class="record">nouveau record !</span>' : "");
+    const newRecord = mode==="free" && score>0 && score===save.best;
+    $("#goDetails").innerHTML = "+"+coinsThisRun+" pièces"+(mode==="free"?" · niveau "+curLevel:"")+(newRecord? ' · <span class="record">nouveau record !</span>' : "");
     showOverlay("gameover");
     spawnParticles(snake[0][0], snake[0][1], "#ff5470", 18);
     beep(120,0.2,"sawtooth");
+  }
+
+  function endChrono(){
+    state = "gameover";
+    $("#hud").classList.add("hidden");
+    $("#controlsBar").classList.add("hidden");
+    clearInterval(chaosTimer);
+    let newRecord = false;
+    if(score > save.bestChrono){ save.bestChrono = score; newRecord = true; }
+    save.crystals += Math.floor(score/150);
+    ensureDaily();
+    save.stats.totalGames++; save.daily.gamesToday++;
+    addXp(Math.floor(score/4)+coinsThisRun);
+    persist();
+    renderTopbar();
+    checkAchievements();
+    $("#goDetails").innerHTML = ""; // replaced below
+    $("#finalScore").textContent = score;
+    $("#goDetails").innerHTML = "+"+coinsThisRun+" pièces en 60 secondes"+(newRecord? ' · <span class="record">nouveau record Chrono !</span>' : "");
+    showOverlay("gameover");
+    spawnParticles(snake[0][0], snake[0][1], "#ffc94d", 18);
+    beep(700,0.2,"triangle");
   }
 
   function starsFor(level, elapsedMs, remainMs){
@@ -1246,7 +1545,10 @@
     save.coins += reward;
     save.career.stars[currentLevel.id] = Math.max(save.career.stars[currentLevel.id]||0, stars);
     addXp(20 + stars*8 + (currentLevel.isBoss?20:0));
+    ensureDaily();
+    save.stats.totalGames++; save.stats.totalCareerWins++; save.daily.gamesToday++;
     persist(); renderTopbar();
+    checkAchievements();
 
     $("#lrIcon").textContent = currentLevel.isBoss ? "👑" : (stars===3?"🏆":(stars===2?"⭐":"✅"));
     $("#lrTitle").textContent = currentLevel.isBoss ? "Boss vaincu !" : "Niveau réussi !";
@@ -1269,6 +1571,9 @@
     $("#hud").classList.add("hidden");
     $("#controlsBar").classList.add("hidden");
     clearInterval(chaosTimer);
+    ensureDaily();
+    save.stats.totalGames++; save.stats.totalDeaths++; save.daily.gamesToday++;
+    persist();
 
     $("#lrIcon").textContent = "💥";
     $("#lrTitle").textContent = "Niveau échoué";
@@ -1369,7 +1674,28 @@
     return true;
   }
 
-  const SKILL_ACTIONS = {chronos:useChronos, nova:useNova, ouroboros:useOuroboros, tempete:useTempete, leviathan:useLeviathan};
+  function useTitan(){
+    const hx=snake[0][0], hy=snake[0][1];
+    const now = performance.now();
+    let hit = false;
+    enemies.forEach(e=>{
+      if(Math.abs(e.x-hx)+Math.abs(e.y-hy) <= 5){ e.stunnedUntil = now+4000; hit = true; }
+    });
+    triggerSkillAnimation("titan");
+    playNoiseBurst(0.15,0.2);
+    playTone(110,0.35,"square",0.15);
+    return true;
+  }
+
+  function useMirage(){
+    decoy = {x:snake[0][0], y:snake[0][1], until:performance.now()+5000};
+    triggerSkillAnimation("mirage", {decoyPos:[decoy.x, decoy.y]});
+    playSweep(900,300,0.3,"sine",0.13);
+    playTone(1200,0.1,"triangle",0.1);
+    return true;
+  }
+
+  const SKILL_ACTIONS = {chronos:useChronos, nova:useNova, ouroboros:useOuroboros, tempete:useTempete, leviathan:useLeviathan, titan:useTitan, mirage:useMirage};
 
   function activateSkill(){
     if(!snakeDef.skill || skillCharges<=0 || state!=="playing") return;
@@ -1487,6 +1813,16 @@
       ctx.quadraticCurveTo(cx+CELL*0.2, cy-CELL*0.55, cx+CELL*0.05, cy-CELL*0.6);
       ctx.quadraticCurveTo(cx-CELL*0.05, cy-CELL*0.4, cx, cy-CELL*0.3);
       ctx.fill();
+    } else if(id==="titan"){
+      ctx.fillStyle="rgba(216,201,168,0.9)";
+      ctx.fillRect(cx-CELL*0.24, cy-CELL*0.48, CELL*0.16, CELL*0.14);
+      ctx.fillRect(cx+CELL*0.08, cy-CELL*0.48, CELL*0.16, CELL*0.14);
+    } else if(id==="mirage"){
+      const r = CELL*0.3 + Math.sin(now/180)*3;
+      ctx.strokeStyle="rgba(193,95,174,0.6)"; ctx.lineWidth=1.3;
+      for(let k=0;k<3;k++){
+        ctx.beginPath(); ctx.arc(cx,cy-CELL*0.1, r+k*4, now/300+k, now/300+k+3.5); ctx.stroke();
+      }
     }
   }
 
@@ -1628,13 +1964,25 @@
   function renderSkillFx(now){
     if(!skillFx) return;
     if(skillFx.id==="chronos"){ renderChronosFx(now); return; }
-    const DUR = {nova:550, ouroboros:400, tempete:400, leviathan:750}[skillFx.id] || 500;
+    const DUR = {nova:550, ouroboros:400, tempete:400, leviathan:750, titan:500, mirage:450}[skillFx.id] || 500;
     const elapsed = now - skillFx.start;
     if(elapsed > DUR){ skillFx = null; return; }
     const p = Math.min(1, elapsed/DUR);
     const W = COLS*CELL, H = ROWS*CELL;
 
-    if(skillFx.id==="nova"){
+    if(skillFx.id==="titan"){
+      const hx = snake[0][0]*CELL+CELL/2, hy = snake[0][1]*CELL+CELL/2;
+      ctx.save(); ctx.globalAlpha = 1-p;
+      ctx.strokeStyle = "#d8c9a8"; ctx.lineWidth = 4;
+      ctx.beginPath(); ctx.arc(hx,hy, p*5*CELL, 0, Math.PI*2); ctx.stroke();
+      ctx.restore();
+    } else if(skillFx.id==="mirage" && skillFx.decoyPos){
+      const cx = skillFx.decoyPos[0]*CELL+CELL/2, cy = skillFx.decoyPos[1]*CELL+CELL/2;
+      ctx.save(); ctx.globalAlpha = 1-p;
+      ctx.strokeStyle = "#c15fae"; ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.arc(cx,cy, 6+p*24, 0, Math.PI*2); ctx.stroke();
+      ctx.restore();
+    } else if(skillFx.id==="nova"){
       ctx.save(); ctx.globalAlpha = (1-p)*0.7;
       const grad = ctx.createRadialGradient(W/2,H/2,0,W/2,H/2, Math.max(W,H)*p);
       grad.addColorStop(0,"rgba(180,255,150,0.9)"); grad.addColorStop(1,"rgba(180,255,150,0)");
@@ -1696,13 +2044,42 @@
 
     enemies.forEach(e=>{
       const cx = e.x*CELL+CELL/2, cy = e.y*CELL+CELL/2;
-      ctx.fillStyle = e.type==="hunter" ? "#ff5470" : "#ff9f43";
-      ctx.beginPath();
-      ctx.moveTo(cx, cy-CELL/2+3); ctx.lineTo(cx+CELL/2-3, cy); ctx.lineTo(cx, cy+CELL/2-3); ctx.lineTo(cx-CELL/2+3, cy);
-      ctx.closePath(); ctx.fill();
-      ctx.fillStyle = "rgba(10,12,18,0.85)";
-      ctx.beginPath(); ctx.arc(cx, cy, 2.2, 0, Math.PI*2); ctx.fill();
+      if(e.type==="boss"){
+        const pulse = 1 + Math.sin(now/220)*0.08;
+        const flashing = e.telegraphing;
+        ctx.save();
+        if(flashing){ ctx.shadowColor = "#ff5470"; ctx.shadowBlur = 14 + Math.sin(now/60)*8; }
+        else { ctx.shadowColor = "#ff5470"; ctx.shadowBlur = 6; }
+        ctx.fillStyle = flashing ? (Math.sin(now/60)>0?"#fff":"#ff5470") : "#c23a52";
+        const rr = CELL*0.62*pulse;
+        ctx.beginPath();
+        ctx.moveTo(cx, cy-rr); ctx.lineTo(cx+rr, cy); ctx.lineTo(cx, cy+rr); ctx.lineTo(cx-rr, cy);
+        ctx.closePath(); ctx.fill();
+        ctx.restore();
+        ctx.fillStyle="rgba(10,12,18,0.9)";
+        ctx.beginPath(); ctx.arc(cx-rr*0.25, cy, 2.6, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(cx+rr*0.25, cy, 2.6, 0, Math.PI*2); ctx.fill();
+      } else {
+        ctx.save();
+        if(e.stunnedUntil && now<e.stunnedUntil) ctx.globalAlpha = 0.4 + Math.sin(now/100)*0.15;
+        ctx.fillStyle = e.type==="hunter" ? "#ff5470" : "#ff9f43";
+        ctx.beginPath();
+        ctx.moveTo(cx, cy-CELL/2+3); ctx.lineTo(cx+CELL/2-3, cy); ctx.lineTo(cx, cy+CELL/2-3); ctx.lineTo(cx-CELL/2+3, cy);
+        ctx.closePath(); ctx.fill();
+        ctx.fillStyle = "rgba(10,12,18,0.85)";
+        ctx.beginPath(); ctx.arc(cx, cy, 2.2, 0, Math.PI*2); ctx.fill();
+        ctx.restore();
+      }
     });
+
+    if(decoy && now<decoy.until){
+      const cx = decoy.x*CELL+CELL/2, cy = decoy.y*CELL+CELL/2;
+      ctx.save(); ctx.globalAlpha = 0.5+Math.sin(now/150)*0.2;
+      ctx.fillStyle = "#c15fae";
+      roundRect(cx-CELL*0.4, cy-CELL*0.4, CELL*0.8, CELL*0.8, CELL*0.28);
+      ctx.fill();
+      ctx.restore();
+    }
 
     if(food){
       const cx = food[0]*CELL+CELL/2, cy = food[1]*CELL+CELL/2;
@@ -1721,7 +2098,19 @@
     });
     ctx.globalAlpha = 1;
 
-    if(mode==="free" && (state==="playing"||state==="paused")){ $("#scoreBadge").innerHTML = score||0; }
+    if(isFog){
+      const hx = snake[0][0]*CELL+CELL/2, hy = snake[0][1]*CELL+CELL/2;
+      const rad = CELL*5.5;
+      ctx.save();
+      const grad = ctx.createRadialGradient(hx,hy,rad*0.35,hx,hy,rad);
+      grad.addColorStop(0,"rgba(6,5,14,0)");
+      grad.addColorStop(1,"rgba(6,5,14,0.94)");
+      ctx.fillStyle = grad;
+      ctx.fillRect(0,0,W,H);
+      ctx.restore();
+    }
+
+    if(mode!=="career" && (state==="playing"||state==="paused")){ $("#scoreBadge").innerHTML = score||0; }
   }
 
   /* ================= Power-ups in-run ================= */
@@ -1844,6 +2233,9 @@
       if(score > save.best){ save.best = score; }
       if(save.bestLevel < curLevel){ save.bestLevel = curLevel; }
       persist(); renderTopbar();
+    } else if(mode==="chrono"){
+      if(score > save.bestChrono){ save.bestChrono = score; }
+      persist(); renderTopbar();
     }
     state = "home";
     $("#hud").classList.add("hidden");
@@ -1853,21 +2245,22 @@
 
   document.addEventListener("visibilitychange",()=>{ if(document.hidden && state==="playing") togglePause(); });
 
-  $("#playBtn").onclick = startRun;
-  $("#retryBtn").onclick = startRun;
+  $("#playBtn").onclick = ()=>startRun(homeTab==="career"?"free":homeTab);
+  $("#retryBtn").onclick = ()=>startRun(mode==="career"?"free":mode);
   $("#homeBtn").onclick = ()=>{ state="home"; showOverlay("home"); renderHome(); renderTopbar(); };
 
   /* ================= Sound toolkit ================= */
   let actx;
   function ensureCtx(){ actx = actx || new (window.AudioContext||window.webkitAudioContext)(); return actx; }
   function beep(freq,dur,type){ playTone(freq,dur,type,0.05); }
+  function sfxVol(){ return save.settings ? save.settings.sfxVol : 1; }
   function playTone(freq,dur,type,vol){
-    if(!soundOn) return;
+    if(!soundOn || sfxVol()<=0) return;
     try{
       const a = ensureCtx();
       const o = a.createOscillator(), g = a.createGain();
       o.type = type||"sine"; o.frequency.value = freq;
-      g.gain.value = vol!=null?vol:0.05;
+      g.gain.value = (vol!=null?vol:0.05) * sfxVol();
       o.connect(g); g.connect(a.destination);
       o.start();
       g.gain.exponentialRampToValueAtTime(0.001, a.currentTime+dur);
@@ -1875,14 +2268,14 @@
     }catch(e){}
   }
   function playSweep(f1,f2,dur,type,vol){
-    if(!soundOn) return;
+    if(!soundOn || sfxVol()<=0) return;
     try{
       const a = ensureCtx();
       const o = a.createOscillator(), g = a.createGain();
       o.type = type||"sine";
       o.frequency.setValueAtTime(Math.max(20,f1), a.currentTime);
       o.frequency.exponentialRampToValueAtTime(Math.max(20,f2), a.currentTime+dur);
-      g.gain.value = vol!=null?vol:0.08;
+      g.gain.value = (vol!=null?vol:0.08) * sfxVol();
       o.connect(g); g.connect(a.destination);
       o.start();
       g.gain.exponentialRampToValueAtTime(0.001, a.currentTime+dur);
@@ -1890,7 +2283,7 @@
     }catch(e){}
   }
   function playNoiseBurst(dur,vol){
-    if(!soundOn) return;
+    if(!soundOn || sfxVol()<=0) return;
     try{
       const a = ensureCtx();
       const size = Math.max(1,Math.floor(a.sampleRate*dur));
@@ -1898,7 +2291,7 @@
       const data = buffer.getChannelData(0);
       for(let i=0;i<size;i++){ data[i] = (Math.random()*2-1) * (1-i/size); }
       const src = a.createBufferSource(); src.buffer = buffer;
-      const g = a.createGain(); g.gain.value = vol!=null?vol:0.15;
+      const g = a.createGain(); g.gain.value = (vol!=null?vol:0.15) * sfxVol();
       src.connect(g); g.connect(a.destination);
       src.start();
     }catch(e){}
@@ -1906,6 +2299,83 @@
   function playChord(freqs,dur,vol,type){
     freqs.forEach(f=>playTone(f,dur,type||"sine",(vol||0.06)/Math.sqrt(freqs.length)));
   }
+
+  /* ---- Procedural ambient background music ---- */
+  let musicGain = null, musicTimer = null, musicChordIdx = 0;
+  let customMusicActive = false;
+  const MUSIC_CHORDS = [[220,277,330],[196,246,294],[174,220,261],[196,246,294]];
+  function startMusic(){
+    if(musicTimer || customMusicActive) return;
+    try{
+      const a = ensureCtx();
+      musicGain = a.createGain();
+      musicGain.gain.value = save.settings.musicVol;
+      musicGain.connect(a.destination);
+      const playChordOnce = ()=>{
+        const chord = MUSIC_CHORDS[musicChordIdx % MUSIC_CHORDS.length];
+        musicChordIdx++;
+        chord.forEach((f,i)=>{
+          const o = a.createOscillator(), g = a.createGain();
+          o.type = "sine"; o.frequency.value = f/2;
+          g.gain.value = 0;
+          o.connect(g); g.connect(musicGain);
+          const t0 = a.currentTime;
+          g.gain.linearRampToValueAtTime(0.16/chord.length, t0+1.2);
+          g.gain.linearRampToValueAtTime(0, t0+3.8);
+          o.start(t0); o.stop(t0+4);
+        });
+      };
+      playChordOnce();
+      musicTimer = setInterval(playChordOnce, 4000);
+    }catch(e){}
+  }
+  function stopProceduralMusic(){
+    if(musicTimer){ clearInterval(musicTimer); musicTimer = null; }
+    if(musicGain){ try{ musicGain.disconnect(); }catch(e){} musicGain = null; }
+  }
+  function setMusicVolume(v){
+    save.settings.musicVol = v;
+    if(musicGain) musicGain.gain.value = v;
+    const audioEl = $("#customAudio");
+    if(customMusicActive) audioEl.volume = v;
+    persist();
+  }
+  function setSfxVolume(v){ save.settings.sfxVol = v; persist(); }
+  function ensureMusicStarted(){
+    if(!musicTimer && !customMusicActive && save.settings.musicVol>0) startMusic();
+  }
+  ["click","keydown","touchstart"].forEach(evt=>{
+    document.addEventListener(evt, ensureMusicStarted, {once:true});
+  });
+
+  function useCustomMusicFile(file){
+    stopProceduralMusic();
+    const audioEl = $("#customAudio");
+    const url = URL.createObjectURL(file);
+    audioEl.src = url;
+    audioEl.loop = true;
+    audioEl.volume = save.settings.musicVol;
+    audioEl.play().catch(()=>{});
+    customMusicActive = true;
+    $("#musicSourceLabel").textContent = "Fichier : "+file.name;
+    $("#clearMusicFile").classList.remove("hidden");
+  }
+  function clearCustomMusicFile(){
+    const audioEl = $("#customAudio");
+    audioEl.pause();
+    if(audioEl.src){ URL.revokeObjectURL(audioEl.src); audioEl.removeAttribute("src"); audioEl.load(); }
+    customMusicActive = false;
+    $("#musicSourceLabel").textContent = "Musique procédurale";
+    $("#clearMusicFile").classList.add("hidden");
+    $("#musicFileInput").value = "";
+    if(save.settings.musicVol>0) startMusic();
+  }
+  $("#chooseMusicFile").onclick = ()=>{ $("#musicFileInput").click(); };
+  $("#musicFileInput").addEventListener("change", (e)=>{
+    const f = e.target.files && e.target.files[0];
+    if(f) useCustomMusicFile(f);
+  });
+  $("#clearMusicFile").onclick = clearCustomMusicFile;
 
   /* ================= Init ================= */
 

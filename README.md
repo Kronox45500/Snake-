@@ -23,18 +23,21 @@ Pour l'héberger en ligne avec **GitHub Pages** :
 
 ## Fonctionnalités
 
-- **Mode Libre** : partie classique sans fin, avec montée en difficulté, ennemis qui apparaissent progressivement, et un système de combo.
-- **Mode Carrière** : 36 niveaux répartis en 6 chapitres sous forme d'un arbre horizontal scrollable, avec des embranchements (deux chemins alternatifs au choix) et un boss à la fin de chaque chapitre. Étoiles (1 à 3) selon la performance.
-- **8 serpents** à débloquer avec des pièces, chacun avec une capacité passive et un design distinct.
-- **5 serpents premium** obtenables uniquement via un gacha (monnaie : cristaux 💎), avec une compétence active rechargeable, une animation dédiée et un son propre :
-  - **Ouroboros** — coupe sa propre queue pour s'échapper (2 charges fixes, ne se recharge pas)
-  - **Tempête** — dash fulgurant à travers tout (2 charges, recharge rapide)
-  - **Nova** — élimine tous les ennemis et les obstacles proches
-  - **Léviathan** — balaie tous les obstacles du terrain
-  - **Chronos** — suspend le temps et rembobine 5 secondes en arrière
-- **5 terrains** avec un multiplicateur de pièces croissant selon la difficulté.
-- **Boutique** avec quatre rayons : Serpents, Terrains, Objets (consommables), Gacha.
+- **4 modes de jeu** :
+  - **Libre** — partie classique sans fin, difficulté croissante, ennemis progressifs, combos.
+  - **Chrono** — 60 secondes pour marquer le plus de points possible.
+  - **Zen** — aucune mort possible, juste pour se détendre.
+  - **Carrière** — 36 niveaux en 6 chapitres, arbre horizontal scrollable avec embranchements et un vrai **boss** à pattern (télégraphie une attaque avant de faire apparaître des obstacles) à la fin de chaque chapitre.
+- **10 serpents de base** à débloquer avec des pièces, chacun avec une capacité passive et un design distinct (dont Camouflage, indétectable par les chasseurs, et Régénérateur, qui s'auto-allège).
+- **7 serpents premium** obtenables uniquement via un gacha (monnaie : cristaux 💎), avec une compétence active rechargeable, une animation et un son dédiés :
+  Ouroboros, Tempête, Titan, Nova, Léviathan, Chronos, Mirage.
+- **7 terrains**, dont Glace (glissante) et Éclipse (brouillard de guerre), avec un multiplicateur de pièces croissant selon la difficulté.
+- **Système d'amélioration** : dépensez des pièces pour faire progresser chaque serpent possédé (jusqu'à 5 niveaux), boostant les gains de pièces et, pour les serpents premium, réduisant le temps de recharge de leur compétence.
+- **Succès (16) et défis quotidiens (3)**, avec récompenses en pièces, cristaux et XP.
+- **Musique de fond procédurale** générée en direct, avec réglages de volume séparés pour la musique et les effets sonores.
+- **Boutique** avec cinq rayons : Serpents, Terrains, Objets, Amélioration, Gacha.
 - **Système de rang** (Bronze → Argent → Or → Platine → Diamant → Maître) basé sur un niveau de joueur et de l'XP ; cliquez sur votre rang pour voir tous les paliers.
+- **Menu adapté au PC** : mise en page plus large sur grand écran, listes en grille, effets au survol, défilement à la molette ou au cliqué-glissé pour l'arbre de carrière.
 - Progression sauvegardée localement dans le navigateur (`localStorage`).
 
 ## Structure du projet

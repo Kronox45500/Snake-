@@ -45,6 +45,9 @@
           <div class="pill gold"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.6"/></svg><span id="coinCount">0</span></div>
           <div class="pill crystal">💎<span id="crystalCount">0</span></div>
           <div class="pill"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2l2.6 6.2L21 9l-5 4.6L17.4 20 12 16.5 6.6 20 8 13.6 3 9l6.4-.8L12 2z" fill="currentColor"/></svg><span id="bestScore">0</span></div>
+          <div class="icon-btn" id="openAchievements" title="Succès et défis">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="5"/><path d="M8.5 13.5L7 22l5-3 5 3-1.5-8.5"/></svg>
+          </div>
           <div class="icon-btn" id="openSettings" title="Réglages">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06A1.65 1.65 0 005.6 15a1.65 1.65 0 00-1.51-1H4a2 2 0 010-4h.09A1.65 1.65 0 005 8.6a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06A1.65 1.65 0 009 4.6a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06A1.65 1.65 0 0019.4 9c.36.1.68.32 1 .51H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
           </div>
@@ -61,6 +64,8 @@
 
       <div class="modetabs">
         <div class="modetab active" data-mode="free">Libre</div>
+        <div class="modetab" data-mode="chrono">Chrono</div>
+        <div class="modetab" data-mode="zen">Zen</div>
         <div class="modetab" data-mode="career">Carrière</div>
       </div>
 
@@ -107,6 +112,24 @@
     </div>
   </div>
 
+  <!-- ACHIEVEMENTS & DAILY CHALLENGES -->
+  <div class="overlay hidden" id="overlay-achievements" style="justify-content:flex-start;">
+    <div class="overlay-inner">
+      <div class="topline"><div class="brand">Succès</div></div>
+      <div class="tabs">
+        <div class="ach-tab active" data-achtab="daily">Défis du jour</div>
+        <div class="ach-tab" data-achtab="list">Succès</div>
+      </div>
+      <div id="dailyPanel">
+        <div class="card-list" id="dailyList"></div>
+      </div>
+      <div id="achPanel" class="panel-hidden">
+        <div class="card-list" id="achievementsList"></div>
+      </div>
+      <button class="btn secondary" id="closeAchievements" style="margin-top:16px;">Retour</button>
+    </div>
+  </div>
+
   <!-- SHOP -->
   <div class="overlay hidden" id="overlay-shop">
     <div class="overlay-inner">
@@ -121,6 +144,7 @@
         <div class="tab active" data-tab="snakes">Serpents</div>
         <div class="tab" data-tab="maps">Terrains</div>
         <div class="tab" data-tab="items">Objets</div>
+        <div class="tab" data-tab="upgrade">Amélioration</div>
         <div class="tab" data-tab="gacha">Gacha</div>
       </div>
       <div class="card-list" id="shopList"></div>
@@ -151,7 +175,27 @@
   <div class="overlay hidden" id="overlay-settings" style="justify-content:flex-start;">
     <div class="overlay-inner">
       <div class="topline"><div class="brand">Réglages</div></div>
-      <div class="bind-hint">Cliquez sur « Changer » puis appuyez sur la touche souhaitée. Les flèches WASD restent toujours actives en secours.</div>
+
+      <div class="volume-row">
+        <div class="volume-label"><span>🎵 Musique</span><span id="musicVolLabel">35%</span></div>
+        <input type="range" id="musicVolume" min="0" max="100" value="35" class="slider">
+      </div>
+      <div class="music-source-row">
+        <div class="music-source-label">Source : <span id="musicSourceLabel">Musique procédurale</span></div>
+        <div class="row2">
+          <button class="btn secondary small" id="chooseMusicFile">Choisir un MP3…</button>
+          <button class="btn secondary small hidden" id="clearMusicFile">Retirer</button>
+        </div>
+        <div class="music-hint">Le fichier reste actif pour cette session ; il n'est pas sauvegardé (il faudra le resélectionner après un rechargement de la page).</div>
+        <input type="file" id="musicFileInput" accept="audio/*" style="display:none">
+        <audio id="customAudio" loop style="display:none"></audio>
+      </div>
+      <div class="volume-row">
+        <div class="volume-label"><span>🔊 Effets sonores</span><span id="sfxVolLabel">100%</span></div>
+        <input type="range" id="sfxVolume" min="0" max="100" value="100" class="slider">
+      </div>
+
+      <div class="bind-hint" style="margin-top:16px;">Cliquez sur « Changer » puis appuyez sur la touche souhaitée. Les flèches WASD restent toujours actives en secours.</div>
       <div class="card-list" id="settingsList"></div>
       <button class="btn secondary" id="resetBinds" style="margin-top:14px;">Réinitialiser les touches</button>
       <button class="btn" id="closeSettings" style="margin-top:10px;">Retour</button>
